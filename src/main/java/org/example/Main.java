@@ -1,6 +1,7 @@
 package org.example;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 
 public class Main {
@@ -11,6 +12,6 @@ public class Main {
             System.out.println(todo);
         }
         Instant end = Instant.now();
-        System.out.println("Hello world!");
+        System.out.println("Time Consumed="+ Duration.between(end, begin));
     }
 }
