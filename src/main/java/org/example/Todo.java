@@ -11,16 +11,26 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public record Todo(String userId, String id, String title, Boolean completed ){
-    public static Todo readTodo(Integer index) throws IOException, InterruptedException {
-        try(var scope = new StructuredTaskScope<Todo>()){
+    static ExecutorService executor = Executors.newCachedThreadPool();
+    public static Todo virtualReadTodo(Integer index) throws InterruptedException {
+       try(var scope = new StructuredTaskScope<Todo>()){
             Future<Todo> futureA = scope.fork(()-> Todo.readTodoFromSource(index));
             scope.join();
             Todo todoA = futureA.resultNow();
             return todoA;
-        }
+       }
+    }
+
+    public static Todo readTodo(Integer index) throws InterruptedException, ExecutionException {
+        Future<Todo> futureA = executor.submit(()-> Todo.readTodoFromSource(index));
+        Todo todoA = futureA.get();
+        return todoA;
     }
     public static Todo fromJson(String json){
         try(JsonParser parser = Json.createParser(new StringReader(json))){
